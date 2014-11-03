@@ -1,17 +1,21 @@
-LOOP LDR R5 SIZE	;while loop, R5 contains SIZE
+LDR R5 SIZE	;while loop, R5 contains SIZE
 SUB R6 R6			; clear R6
 ADI R6 #1 			; R6 contains the value 1
 LDA R0 ARR 			; load ARR address into r0
-LDR R1 R0 			; load the value of the address in r0 into r1
 SUB R4 R4
+LOOP LDR R1 R0 		; load the value of the address in r0 into r1
 ADD R4 R1 			; R4 contains the sum
-SUB R3 R3
+BGT R1 POS
+SUB R2 R2
+ADI R2 #-1
+MUL R1 R2 
+POS SUB R3 R3
 ADI R3 #2
 EOO SUB R1 R3		; subtract array element - 2 
 BGT R1 EOO 			; branch back to subtract 2 again
 BRZ R1 EVEN			; if zero, value is even
 BLT R1 ODD 			; if -1, value is odd
-EVEN LDA R0 R7 		; start of even printf
+EVEN LDR R7 R0 		; start of even printf
 TRP 1
 LDR R7 SPACE
 TRP 3
@@ -32,7 +36,7 @@ TRP 3
 LDR R7 NEWLINE
 TRP 3
 JMP DECREMENT
-ODD LDA R0 R7 			;ODD printf
+ODD LDR R7 R0 			;ODD printf
 TRP 1
 LDR R7 SPACE
 TRP 3

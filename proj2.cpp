@@ -335,10 +335,10 @@ int main(int argc, char* argv[])
 	}
 
 	// cout << mem[0] << endl;
-	int* ptr2 = static_cast<int*>(static_cast<void*>(&mem[12]));
-	cout << *ptr2 << endl;
-	cout << *(ptr2+1) << endl;
-	cout << *(ptr2+2) << endl;
+	// int* ptr2 = static_cast<int*>(static_cast<void*>(&mem[12]));
+	// cout << *ptr2 << endl;
+	// cout << *(ptr2+1) << endl;
+	// cout << *(ptr2+2) << endl;
 	// cout << *(ptr2+4) << endl;
 
 
@@ -381,6 +381,40 @@ int main(int argc, char* argv[])
 					PC+=INSTRSIZE;
 				}
 				break;
+			case 1:
+				//branch to label (JMP)
+				PC = *(ptrPC+1);
+				break;
+			case 4:
+				if (reg[*(ptrPC+1)] > 0)
+				{
+					PC = *(ptrPC+2);
+				}
+				else
+				{
+					PC+=INSTRSIZE;
+				}
+				break;
+			case 5:
+				if (reg[*(ptrPC+1)] < 0)
+				{
+					PC = *(ptrPC+2);
+				}
+				else
+				{
+					PC+=INSTRSIZE;
+				}
+				break;
+			case 6:
+				if (reg[*(ptrPC+1)] == 0)
+				{
+					PC = *(ptrPC+2);
+				}
+				else
+				{
+					PC+=INSTRSIZE;
+				}
+				break;
 			case 7:
 				reg[*(ptrPC+1)] = reg[*(ptrPC+2)];
 				PC+=INSTRSIZE;
@@ -408,6 +442,10 @@ int main(int argc, char* argv[])
 				reg[*(ptrPC+1)] += reg[*(ptrPC+2)];
 				PC+=INSTRSIZE;
 				break;
+			case 14:
+				reg[*(ptrPC+1)] += *(ptrPC+2);
+				PC+=INSTRSIZE;
+				break;
 			case 15:
 				reg[*(ptrPC+1)] -= reg[*(ptrPC+2)];
 				PC+=INSTRSIZE;
@@ -421,7 +459,8 @@ int main(int argc, char* argv[])
 				PC+=INSTRSIZE;
 				break;
 			case 22:
-
+				reg[*(ptrPC+1)] = *(ptrData+(reg[*(ptrPC+2)]));				 
+				PC+=INSTRSIZE;
 				break;
 		}
 	}
