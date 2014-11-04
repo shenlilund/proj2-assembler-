@@ -414,7 +414,8 @@ int main(int argc, char* argv[])
 				PC+=INSTRSIZE;
 				break;
 			case 22:
-				intPtr = static_cast<int*>(static_cast<void*>(ptrData+*(ptrPC+2)));
+				int tempInt = reg[*(ptrPC+2)];
+				intPtr = static_cast<int*>(static_cast<void*>(ptrData+tempInt));
 				reg[*(ptrPC+1)] = *(intPtr);				 
 				PC+=INSTRSIZE;
 				break;

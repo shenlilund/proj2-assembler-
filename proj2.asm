@@ -54,7 +54,9 @@ TRP 3
 LDR R7 NEWLINE
 TRP 3
 DECREMENT SUB R5 R6 			; size - 1
-ADD R0 R6					; add 1 to array address
+SUB R2 R2
+ADI R2 #4
+ADD R0 R2					; add 1 to array address
 BGT R5 LOOP
 LDR R7 SUM1
 TRP 3
