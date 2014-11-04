@@ -52,6 +52,10 @@ int main(int argc, char* argv[])
 	instructions.push_back("DIV");
 	instructions.push_back("AND");
 	instructions.push_back("CMP");
+	// instructions.push_back("STR");
+	// instructions.push_back("LDR");
+	// instructions.push_back("STB");
+	// instructions.push_back("LDB");
 	instructions.push_back(".INT");
 	instructions.push_back(".BYT");
 
@@ -206,7 +210,7 @@ int main(int argc, char* argv[])
 						*(ptr+1) = temp;
 					}
 					// register, label
-					else if (words[0] == "BNZ" || words[0] == "BGT" || words[0] == "BLT" || words[0] == "BRZ" || words[0] == "LDA" || words[0] == "STR" || words[0] == "STB" || words[0] == "LDB")
+					else if (words[0] == "BNZ" || words[0] == "BGT" || words[0] == "BLT" || words[0] == "BRZ" || words[0] == "LDA" || words[0] == "STR")
 					{
 						int temp;
 						temp = words[1][1] - '0';
@@ -222,13 +226,24 @@ int main(int argc, char* argv[])
 							return -1;
 						}
 					}
-					else if (words[0] == "LDR")
+					else if (words[0] == "LDR" || words[0] == "LDB" || words[0] == "STB")
 					{
-						//LDR with register - register (instruction 22)
+						//register indirect with register - register 
 						string str = words[2];
 						if (str[0] == 'R' && (str[1] == '0' || str[1] == '1' || str[1] == '2' || str[1] == '3' || str[1] == '4' || str[1] == '5' || str[1] == '6' || str[1] == '7'))
 						{
-							*ptr = 22;
+							if (words[0] == "LDR")
+							{
+								*ptr = 22;
+							}
+							else if (words[0] == "LDB")
+							{
+								*ptr = 24;
+							}
+							else if (words[0] == "STB")
+							{
+								*ptr = 23;
+							}
 							int temp;
 							temp = words[1][1] - '0';
 							*(ptr+1) = temp;
@@ -236,7 +251,7 @@ int main(int argc, char* argv[])
 							temp2 = words[2][1] - '0';
 							*(ptr+2) = temp2;
 						}
-						//LDR with register - label  (instruction 10)
+						// register - label  
 						else
 						{
 							int temp;
@@ -326,7 +341,11 @@ int main(int argc, char* argv[])
 	{
 		int* ptrPC = static_cast<int*>(static_cast<void*>(&mem[PC]));
 		char* ptrData = static_cast<char*>(static_cast<void*>(&mem[beginData]));
-		int* intPtr;	
+		int* intPtr;
+		int* intPtr2;	
+		int tempInt;
+		char* charPtr;
+		char* charPtr2;
 		switch(*ptrPC)
 		{
 			case 0:
@@ -413,10 +432,30 @@ int main(int argc, char* argv[])
 				reg[*(ptrPC+1)] /= reg[*(ptrPC+2)];
 				PC+=INSTRSIZE;
 				break;
+			case 21:
+				tempInt = reg[*(ptrPC+2)];
+				intPtr = static_cast<int*>(static_cast<void*>(ptrData+tempInt));
+				intPtr2 = static_cast<int*>(static_cast<void*>(&reg[*(ptrPC+1)]));
+				*intPtr = *intPtr2;
+				PC+=INSTRSIZE;
+				break;
 			case 22:
-				int tempInt = reg[*(ptrPC+2)];
+				tempInt = reg[*(ptrPC+2)];
 				intPtr = static_cast<int*>(static_cast<void*>(ptrData+tempInt));
 				reg[*(ptrPC+1)] = *(intPtr);				 
+				PC+=INSTRSIZE;
+				break;
+			case 23:
+				tempInt = reg[*(ptrPC+2)];
+				charPtr = static_cast<char*>(static_cast<void*>(ptrData+tempInt));
+				charPtr2 = static_cast<char*>(static_cast<void*>(&reg[*(ptrPC+1)]));
+				*charPtr = *charPtr2;
+				PC+=INSTRSIZE;
+				break;
+			case 24:
+				tempInt = reg[*(ptrPC+2)];
+				charPtr = static_cast<char*>(static_cast<void*>(ptrData+tempInt));
+				reg[*(ptrPC+1)] = *(charPtr);				 
 				PC+=INSTRSIZE;
 				break;
 		}
