@@ -103,9 +103,13 @@ int main(int argc, char* argv[])
 			// {
 			// 	cout << words[i] << endl;
 			// }
-			if (words[0] == ".BYT" || words[0] == ".INT" || words[1] == ".BYT" || words[1] == ".INT")
+			if (words[0] == ".BYT" || words[1] == ".BYT")
 			{
 				dataAddress++;
+			}
+			else if (words[0] == ".INT" || words[1] == ".INT")
+			{
+				dataAddress+=INTSIZE;
 			}
 			else
 			{
@@ -132,33 +136,6 @@ int main(int argc, char* argv[])
 		bool first = true;
 		while (iss >> word)
 		{
-			//for space characters
-			if (word == "'")
-			{
-				char temp = iss.get();
-				string tempStr;
-				tempStr = temp;
-				words.push_back(tempStr);
-				break;
-			}
-			else if (word[0] == '\'')
-			{
-				if (word[1] == '\\' && word[2] == 'n')
-				{
-					string temp1;
-					temp1 = word.erase(0,1);
-					temp1 = word.erase(2,1);
-					words.push_back(temp1);
-				}
-				else
-				{
-					string temp;
-					temp = word[1];
-					words.push_back(temp);
-				}
-			}
-			else
-			{
 				if (word[0] == ';')
 					break;
 				bool label = true;
@@ -174,8 +151,6 @@ int main(int argc, char* argv[])
 					words.push_back(word);
 					first = false;
 				}
-			}
-			
 		}
 		// for (int i = 0; i < words.size(); i++)
 		// {
@@ -199,22 +174,10 @@ int main(int argc, char* argv[])
 					}
 					else if (words[0] == ".BYT")
 					{
-						if (words[1] == "\\n")
-						{
 							string temp;
 							temp = words[1];
-							char temp1 = temp[0];
+							char temp1 = temp[1];
 							mem[beginData+dataAddress] = temp1;
-							temp1 = temp[1];
-							mem[beginData+dataAddress+1] = temp1;
-						}
-						else
-						{	
-							string temp;
-							temp = words[1];
-							char temp1 = temp[0];
-							mem[beginData+dataAddress] = temp1;
-						}
 					}
 					else
 					{
@@ -321,7 +284,11 @@ int main(int argc, char* argv[])
 					}
 				}
 			}
-			if (words[0] == ".BYT" || words[0] == ".INT")
+			if (words[0] == ".BYT")
+			{
+				dataAddress++;
+			}
+			else if (words[0] == ".INT")
 			{
 				dataAddress+=INTSIZE;
 			}
@@ -341,6 +308,16 @@ int main(int argc, char* argv[])
 	// cout << *(ptr2+2) << endl;
 	// cout << *(ptr2+4) << endl;
 
+	// char* ptr2 = static_cast<char*>(static_cast<void*>(&mem[beginData]));
+	// // cout << *ptr2 << endl;
+	// int* ptr3 = static_cast<int*>(static_cast<void*>(ptr2));
+	// cout << *(ptr3) << endl;
+	// char* ptr5 = static_cast<char*>(static_cast<void*>(ptr3+1));
+	// cout << *(ptr5) << endl;
+	// int* ptr4 = static_cast<int*>(static_cast<void*>(ptr5+1));
+	// cout << *ptr4 << endl;
+
+
 
 	//virtual machine ----------------------------------------------------------------------------------
 	bool running = true;
@@ -348,7 +325,8 @@ int main(int argc, char* argv[])
 	while (running)
 	{
 		int* ptrPC = static_cast<int*>(static_cast<void*>(&mem[PC]));
-		int* ptrData = static_cast<int*>(static_cast<void*>(&mem[beginData]));	
+		char* ptrData = static_cast<char*>(static_cast<void*>(&mem[beginData]));
+		int* intPtr;	
 		switch(*ptrPC)
 		{
 			case 0:
@@ -364,20 +342,7 @@ int main(int argc, char* argv[])
 				else if (*(ptrPC+1) == 3)
 				{
 					char* charPtr = static_cast<char*>(static_cast<void*>(&reg[7]));
-					
-					if (*charPtr == '\\' && (*(charPtr+1)) == 'n')
-					{
-						cout << '\n';
-						// cout << endl;
-						// string temp;	
-						// temp = *charPtr;
-						// temp+=*(charPtr+1);
-						// cout << temp;
-					}
-					else
-					{
-						cout << *charPtr;
-					}
+					cout << *charPtr;
 					PC+=INSTRSIZE;
 				}
 				break;
@@ -424,18 +389,8 @@ int main(int argc, char* argv[])
 				PC+=INSTRSIZE;
 				break;
 			case 10:
-				if (*(ptrData+(*(ptrPC+2))) == '\\')
-				{
-					char* charPtr = static_cast<char*>(static_cast<void*>(&reg[*(ptrPC+1)]));
-					int temp = beginData+((*(ptrPC+2))*INTSIZE);
-					*charPtr = mem[temp];
-					*(charPtr+1) = mem[temp+1];
-					// cout << *(charPtr+1) << endl;
-				}
-				else
-				{
-					reg[*(ptrPC+1)] = *(ptrData+(*(ptrPC+2)));
-				}
+				intPtr = static_cast<int*>(static_cast<void*>(ptrData+*(ptrPC+2)));
+				reg[*(ptrPC+1)] = *(intPtr);
 				PC+=INSTRSIZE;
 				break;
 			case 13:
@@ -459,7 +414,8 @@ int main(int argc, char* argv[])
 				PC+=INSTRSIZE;
 				break;
 			case 22:
-				reg[*(ptrPC+1)] = *(ptrData+(reg[*(ptrPC+2)]));				 
+				intPtr = static_cast<int*>(static_cast<void*>(ptrData+*(ptrPC+2)));
+				reg[*(ptrPC+1)] = *(intPtr);				 
 				PC+=INSTRSIZE;
 				break;
 		}
